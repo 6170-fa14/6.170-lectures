@@ -1,0 +1,16 @@
+{
+  "name": "l01",
+  "description": "6.170 Lecture 1: Intro",
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/achlipala/6.170-lectures"
+  },
+
+  "engines": {
+    "node": ">= 0.6.0",
+    "npm": ">= 1.0.0"
+  },
+
+  "main": "server.js"
+}
