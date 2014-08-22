@@ -3,6 +3,7 @@ var http = require("http");
 
 // Function called on every HTTP request
 function handle(request, response) {
+    // Do different things based on which URL the browser asked for.
     if (request.url == '/') {
         response.writeHead(200, {"Content-Type": "text/html"});
         response.write('<!DOCTYPE html>'
