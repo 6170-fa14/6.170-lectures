@@ -19,6 +19,28 @@ function fetchUrl(url) {
     return xhr.responseText;
 }
 
+// A nonblocking call to some HTTP server.  That is, return immediately, and trigger a callback when the URL is really fetched.
+function fetchUrlAsync(url, callback) {
+    var xhr = new XMLHttpRequest();
+
+    // Callback for when fetching is complete.
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4) { // Icky magic number 4 for "DONE".
+            if (xhr.status != 200) {
+                var msg = "Error fetching URL " + url + " (status: " + xhr.status + ")";
+                alert(msg);
+                throw {name: "fetchUrlAsync", message: msg};
+            }
+
+            callback(xhr.responseText);
+        }
+    };
+
+    // Now start the fetch.
+    xhr.open("GET", url, true);
+    xhr.send();
+}
+
 
 ///// Wrapping Google's Places web service
 ///// See API documentation here: https://developers.google.com/maps/documentation/javascript/places
