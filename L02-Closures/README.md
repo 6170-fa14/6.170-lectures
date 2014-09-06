@@ -8,3 +8,7 @@ The order of the demos is:
     delayed
     parallel
     serial
+    fetch
+
+Files fastserver.js and slowserver.js are used to support examples like 'fetch'.
+They use Node.js, which we haven't introduced properly yet; but it shouldn't be too important to understand their inner workings yet.

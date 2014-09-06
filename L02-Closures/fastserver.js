@@ -10,10 +10,11 @@ var serve = serveStatic(".");
 // Function called on every HTTP request, doing something pretty dumb here.
 function handle(request, response) {
     if (request.url.indexOf('/?') == 0) {
+        window.setTimeout(function() {
         // This is our fake query handlers.
         response.writeHead(200, {"Content-Type": "text/plain"});
         response.write("Hello " + unescape(request.url.substring(2)));
-        response.end();
+            response.end(); }, 10000);
     } else {
         serve(request, response);
     }
