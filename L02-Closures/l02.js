@@ -26,7 +26,7 @@ function nearbySearch(text, callback) {
                        function(results, status) {
                            if (status != "OK" && status != "ZERO_RESULTS") {
                                var msg = "Request to Google Places service (nearbySearch) failed (status: " + status + ")";
-                               console.log(msg);
+                               alert(msg);
                                throw {name: "places", message: msg};
                            }
 
@@ -41,7 +41,7 @@ function getDetails(placeId, callback) {
                        function(place, status) {
                            if (status != "OK") {
                                var msg = "Request to Google Places service (getDetails) failed (status: " + status + ")";
-                               console.log(msg);
+                               alert(msg);
                                throw {name: "places", message: msg};
                            }
 
