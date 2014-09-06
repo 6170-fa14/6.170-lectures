@@ -2,6 +2,24 @@
 // The lecture doesn't aim to explain this code yet, but it may be interesting to look at, anyway.
 
 
+///// Wrapping standard functions for making HTTP requests
+
+// A blocking call to some HTTP server.  That is, this function won't return until the results are retrieved.
+function fetchUrl(url) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, false); // The "false" part is important, to trigger the (generally deprecated) synchronous mode!
+    xhr.send();
+
+    if (xhr.status != 200) {
+        var msg = "Error fetching URL " + url + " (status: " + xhr.status + ")";
+        alert(msg);
+        throw {name: "fetchUrl", message: msg};
+    }
+
+    return xhr.responseText;
+}
+
+
 ///// Wrapping Google's Places web service
 ///// See API documentation here: https://developers.google.com/maps/documentation/javascript/places
 
