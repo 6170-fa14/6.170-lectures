@@ -4,7 +4,7 @@
 function search(text, output) {
     // First, let's find a selection of nearby locations matching the search text.
     nearbySearch(text, function(results) {
-        // Now let's loop over consider every result.
+        // Now let's loop over considering every result.
         for (var i = 0; i < results.length; ++i) {
             // Does this result's address summary contain the text "Cambridge"?
             // We're only interested in Cambridge results!

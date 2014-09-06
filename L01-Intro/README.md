@@ -9,3 +9,4 @@ These example files are snapshots of progressive states of the coding demo plann
     changetextcounter.html
     onepage.js
     twopages.js
+    shared.js
