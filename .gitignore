@@ -30,3 +30,7 @@ node_modules
 # L01
 L01-Intro/server.js
 L01-Intro/page.html
+
+# L02
+L01-Closures/server.js
+L02-Closures/page.html
