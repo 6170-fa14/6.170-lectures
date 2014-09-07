@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places"></script>
+    <script type="text/javascript" src="l03.js"></script>
+    <script type="text/javascript" src="parallelF5.js"></script>
+  </head>
+  <body onload="initialize()">
+    <input type="text" id="text"> <button onclick="text = document.getElementById('text');
+                                                   results = document.getElementById('results');
+                                                   results.innerHTML = '';
+                                                   search(text.value, function(s) {
+                                                     results.innerHTML += s + '<br>';
+                                                   });">Search</button>
+    <div id="map" style="display: none"></div>
+    <p id="results"></p>
+    <img src="powered-by-google-on-white.png">
+  </body>
+</html>
