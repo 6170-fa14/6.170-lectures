@@ -33,8 +33,9 @@ L01-Intro/page.html
 
 # L02
 L02-Closures/server.js
+L02-Closures/client.js
 L02-Closures/page.html
 
 # L03
-L03-Functionals/server.js
+L03-Functionals/client.js
 L03-Functionals/page.html
