@@ -144,6 +144,7 @@ function TimedLoop(widgets) {
                 span.appendChild(widgets[positionInSequence].getElement());
             } else {
                 ticksAtThisPosition += 1;
+                widgets[positionInSequence].tick();
             }
         }
     };
@@ -190,6 +191,43 @@ function TimeVarying(makeWidget) {
             ticker += 1;
             widget = makeWidget(ticker);
             span.appendChild(widget.getElement());
+        }
+    };
+}
+
+function Textbox(text, bgcolor, width, height) {
+    var span = document.createElement('span');
+    span.style.display = "table-cell";
+    span.style.width = width;
+    span.style.height = height;
+    span.style.borderWidth = "2px";
+    span.style.backgroundColor = bgcolor;
+    span.style.textAlign = "center";
+    span.style.verticalAlign = "middle";
+    span.innerHTML = text;
+
+    return {
+        getElement: function() {
+            return span;
+        },
+        tick: function() {
+        }
+    };
+}
+
+function AtPosition(widget, x, y) {
+    var span = document.createElement("span");
+    span.style.position = "absolute";
+    span.style.left = x;
+    span.style.top = y;
+    span.appendChild(widget.getElement());
+
+    return {
+        getElement: function() {
+            return span;
+        },
+        tick: function() {
+            widget.tick();
         }
     };
 }
@@ -247,3 +285,26 @@ var StickmanAndCircle = function() {
 var StickmenAndCircles = function() {
     return RepeatHorizontalWithPadding(StickmanAndCircle, 5);
 };
+
+var ABox = function() {
+    return Textbox(":-)", "blue", "50px", "30px");
+};
+
+var ABoxes = function() {
+    return Horizontal([RepeatHorizontalWithPadding(ABox, 5),
+                       AtPosition(Stickman(), "1000px", "1000px")]);
+};
+
+var BoxHopsOnce = function() {
+    return TimeVarying(function(tick) {
+        return AtPosition(ABox(),
+                          tick + "px",
+                          (tick < 10 ? 10 - tick : tick - 10) + "px");
+    });
+};
+
+var BoxHopsRepeatedly = function() {
+    return TimedLoop([BoxHopsOnce(), 20, BoxHopsOnce(), 20]);
+};
+
+var Current = BoxHopsRepeatedly;
