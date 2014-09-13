@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="l04.js"></script>
+    <script type="text/javascript" src="widgets.js"></script>
+
+    <script type="text/javascript">
+      function initialize() {
+        var container = document.getElementById("container");
+        container.appendChild(animation(Stickmen(), 300));
+      }
+    </script>
+  </head>
+  <body onload="initialize()">
+    <div id="container"></div>
+  </body>
+</html>
