@@ -5,10 +5,10 @@ Each demo has a `.js` file and a `.html` file.  The HTML files are almost exactl
 The order of the demos is:
 
     parallel (copied from last lecture)
-    oops
     parallelF
     map
     mapMethod
+    oops
     parallelF2
     parallelF3
     parallelF4

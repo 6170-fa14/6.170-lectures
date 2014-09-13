@@ -29,7 +29,7 @@ Array.prototype.map = function(f) {
     return output;
 }
 
-// A thrid classic functional: iterating application of a function over all elements of an array, accumulating a summary.
+// A third classic functional: iterating application of a function over all elements of an array, accumulating a summary.
 Array.prototype.reduce = function(f, acc) {
     for (var i = 0; i < this.length; ++i) {
         acc = f(this[i], acc);
