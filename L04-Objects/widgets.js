@@ -3,6 +3,7 @@
 // "Interface" of a widget object:
 // getElement(), to return a DOM node standing for this object
 // tick(), called to advance the animation to the next step
+// isDone(), querying whether this part of the animation is done
 
 // This function returns an animation of a given widget,
 // advancing to a new frame every 'period' milliseconds.
@@ -10,7 +11,7 @@ function animation(widget, period) {
     function ticker() {
         window.setTimeout(function() {
             widget.tick();
-            ticker();
+            if (!widget.isDone()) { ticker(); }
         }, period);
     }
 
@@ -18,9 +19,17 @@ function animation(widget, period) {
     return widget.getElement();
 }
 
+// Behold: the prototypical widget!
+var Widget = {
+    reset: function() { },
+    isDone: function() { return true; }
+};
+
 // Animation of monospaced text, rotating through a sequence of sprites.
 // The argument is an array of arrays of lines of text (strings).
 function AsciiAnimation(sprites) {
+    var that = Object.create(Widget);
+
     var span = document.createElement('span');
     span.style.display = "inline-block";
     var pre = document.createElement('pre');
@@ -34,15 +43,61 @@ function AsciiAnimation(sprites) {
     var animationFrame = 0;
     useSprite(0);
 
-    return {
-        getElement: function() {
-            return span;
-        },
-        tick: function() {
-            animationFrame = (animationFrame + 1) % sprites.length;
+    that.getElement = function() {
+        return span;
+    };
+
+    that.reset = function() {
+        animationFrame = 0;
+    };
+
+    that.tick = function() {
+        animationFrame += 1;
+        if (animationFrame < sprites.length) {
             useSprite(animationFrame);
         }
     };
+
+    that.isDone = function() {
+        return animationFrame >= sprites.length;
+    };
+
+    return that;
+}
+
+// Play an animation over and over again, given a function for creating new widgets.
+function RepeatIndefinitely(widget) {
+    var that = Object.create(widget);
+
+    that.isDone = function() {
+        if (widget.isDone()) {
+            widget.reset();
+        }
+
+        return false;
+    };
+
+    return that;
+}
+
+// Play an animation a certain number of times.
+function Repeat(widget, times) {
+    var that = Object.create(widget);
+
+    that.isDone = function() {
+        if (times <= 0) {
+            return true;
+        }
+
+        if (widget.isDone()) {
+            times -= 1;
+            widget.reset();
+        }
+
+        return false;
+    };
+
+    return that;
 }
 
 // Graphics via the HTML canvas.
@@ -53,13 +108,13 @@ function Canvas(width, height, withContext) {
     var context = canvas.getContext('2d');
     withContext(context);
 
-    return {
-        getElement: function() {
-            return canvas;
-        },
-        tick: function() {
-        }
+    var that = Object.create(Widget);
+
+    that.getElement = function() {
+        return canvas;
     };
+
+    return that;
 }
 
 function Circle(radius) {
@@ -76,18 +131,28 @@ function Circle(radius) {
 
 // Lay out a widget array horizontally.
 function Horizontal(widgets) {
-    var that = document.createElement('span');
+    var span = document.createElement('span');
+    widgets.each(function(widget) { span.appendChild(widget.getElement()); });
 
-    widgets.each(function(widget) { that.appendChild(widget.getElement()); });
+    var that = Object.create(Widget);
 
-    return {
-        getElement: function() {
-            return that;
-        },
-        tick: function() {
-            widgets.each(function(widget) { widget.tick(); });
-        }
+    that.getElement = function() {
+        return span;
     };
+
+    that.reset = function() {
+        widgets.each(function(widget) { widget.reset(); });
+    };
+
+    that.tick = function() {
+        widgets.each(function(widget) { widget.tick(); });
+    };
+
+    that.isDone = function() {
+        return widgets.reduce(function(b1, b2) { return b1 && b2; }, true);
+    };
+
+    return that;
 }
 
 // Wrap a widget with a certain amount of padding, with width expressed in CSS width format.
@@ -98,14 +163,13 @@ function WithPadding(widget, width) {
     span.style.padding = width;
     span.appendChild(widget.getElement());
 
-    return {
-        getElement: function() {
-            return span;
-        },
-        tick: function() {
-            widget.tick();
-        }
-    }
+    var that = Object.create(widget);
+
+    that.getElement = function() {
+        return span;
+    };
+
+    return that;
 }
 
 // Repeat a single widget scheme (represented as a function returning a widget)
@@ -119,80 +183,37 @@ function RepeatHorizontalWithPadding(makeWidget, count, width) {
     return RepeatHorizontal(function () { return WithPadding(makeWidget(), width); }, count);
 }
 
-function TimedLoop(widgets) {
-    if (widgets.length < 2 || widgets.length % 2 > 0) {
-        throw {name: "TimedLoop", message: "Argument array must be nonempty with even length"};
-    }
-
+// Plays a list of widgets in sequence, starting each after the prior one finishes.
+function Sequence(widgets) {
     var span = document.createElement("span");
     span.appendChild(widgets[0].getElement());
 
-    var positionInSequence = 0;
-    var ticksAtThisPosition = 0;
+    var position = 0;
 
-    return {
-        getElement: function() {
-            return span;
-        },
-        tick: function() {
-            if (ticksAtThisPosition >= widgets[positionInSequence+1]) {
-                span.removeChild(widgets[positionInSequence].getElement());
+    var that = Object.create(Widget);
 
-                ticksAtThisPosition = 0;
-                positionInSequence = (positionInSequence + 2) % widgets.length;
-
-                span.appendChild(widgets[positionInSequence].getElement());
-            } else {
-                ticksAtThisPosition += 1;
-                widgets[positionInSequence].tick();
-            }
-        }
+    that.getElement = function() {
+        return span;
     };
-}
 
-function AlternatingTicks(widgets) {
-    var that = document.createElement('span');
-
-    widgets.each(function(widget) { that.appendChild(widget.getElement()); });
-
-    var parity = 0;
-
-    return {
-        getElement: function() {
-            return that;
-        },
-        tick: function() {
-            widgets.eachi(function(i, widget) { if (i % 2 === parity) { widget.tick(); } });
-            parity = (parity + 1) % 2;
-        }
+    that.reset = function() {
+        widgets.each(function(widget) { widget.reset(); });
+        position = 0;
     };
-}
 
-function AlternatingTicksRepeat(makeWidget, count) {
-    return AlternatingTicks(Array.create(makeWidget, count));
-}
-
-function AlternatingTicksRepeatWithPadding(makeWidget, count, width) {
-    return AlternatingTicksRepeat(function () { return WithPadding(makeWidget(), width); }, count);
-}
-
-function TimeVarying(makeWidget) {
-    var ticker = 0;
-    var span = document.createElement("span");
-    var widget = makeWidget(0);
-    span.appendChild(widget.getElement());
-
-    return {
-        getElement: function() {
-            return span;
-        },
-        tick: function() {
-            span.removeChild(widget.getElement());
-            ticker += 1;
-            widget = makeWidget(ticker);
-            span.appendChild(widget.getElement());
-        }
+    that.tick = function() {
+        widgets[position].tick();
     };
+
+    that.isDone = function() {
+        while (position < widgets.length && widgets[position].isDone()) {
+            position += 1;
+        }
+
+        return position >= widgets.length;
+    };
+
+    return that;
 }
 
 function Textbox(text, bgcolor, width, height) {
@@ -206,105 +227,31 @@ function Textbox(text, bgcolor, width, height) {
     span.style.verticalAlign = "middle";
     span.innerHTML = text;
 
-    return {
-        getElement: function() {
-            return span;
-        },
-        tick: function() {
-        }
+    var that = Object.create(Widget);
+
+    that.getElement = function() {
+        return span;
     };
+
+    return that;
 }
-
-function AtPosition(widget, x, y) {
-    var span = document.createElement("span");
-    span.style.position = "absolute";
-    span.style.left = x;
-    span.style.top = y;
-    span.appendChild(widget.getElement());
-
-    return {
-        getElement: function() {
-            return span;
-        },
-        tick: function() {
-            widget.tick();
-        }
-    };
-}
-
 
 
 //// Some example animations
 
-var Stickman = function() {
-    return AsciiAnimation([
-        [" o ",
-         "-|-",
-         "/ \\"],
-        ["o  ",
-         "|- ",
-         "|\\ "],
-        [" o ",
-         "-|-",
-         "/ \\"],
-        ["  o",
-         " -|",
-         " /|"]
-    ]);
-};
+var stickman = AsciiAnimation([
+    [" o ",
+     "-|-",
+     "/ \\"],
+    ["o  ",
+     "|- ",
+     "|\\ "],
+    [" o ",
+     "-|-",
+     "/ \\"],
+    ["  o",
+     " -|",
+     " /|"]
+]);
 
-var JustALine = function() {
-    return Canvas(500, 500, function(context) {
-        context.beginPath();
-        context.moveTo(100, 100);
-        context.lineTo(200, 200);
-        context.stroke();
-    });
-};
-
-var StickmanAndLine = function() {
-    return Horizontal([Stickman(), JustALine()]);
-};
-
-var Stickmen = function() {
-    return RepeatHorizontalWithPadding(Stickman, 10);
-};
-
-var Timed = function() {
-    return TimedLoop([Stickman(), 5, JustALine(), 1]);
-};
-
-var StickmenAlternating = function() {
-    return AlternatingTicksRepeatWithPadding(Stickman, 10);
-};
-
-var StickmanAndCircle = function() {
-    return Horizontal([Stickman(), TimeVarying(function(tick) { return Circle(3 * (tick % 5 + 1)); })]);
-};
-
-var StickmenAndCircles = function() {
-    return RepeatHorizontalWithPadding(StickmanAndCircle, 5);
-};
-
-var ABox = function() {
-    return Textbox(":-)", "blue", "50px", "30px");
-};
-
-var ABoxes = function() {
-    return Horizontal([RepeatHorizontalWithPadding(ABox, 5),
-                       AtPosition(Stickman(), "1000px", "1000px")]);
-};
-
-var BoxHopsOnce = function() {
-    return TimeVarying(function(tick) {
-        return AtPosition(ABox(),
-                          tick + "px",
-                          (tick < 10 ? 10 - tick : tick - 10) + "px");
-    });
-};
-
-var BoxHopsRepeatedly = function() {
-    return TimedLoop([BoxHopsOnce(), 20, BoxHopsOnce(), 20]);
-};
-
-var Current = BoxHopsRepeatedly;
+var current = Repeat(stickman, 5);

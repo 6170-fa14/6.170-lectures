@@ -21,3 +21,8 @@ Array.prototype.eachi = function(f) {
         f(i, this[i]);
     }
 };
+
+Array.prototype.reduce = function(f, acc) {
+    this.each(function(x) { acc = f(x, acc); });
+    return acc;
+};
