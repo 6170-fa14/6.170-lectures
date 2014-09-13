@@ -22,8 +22,11 @@ function animation(widget, period) {
 // Behold: the prototypical widget!
 var Widget = {
     reset: function() { },
+    tick: function() { },
     isDone: function() { return true; }
 };
+// We use safe defaults for everything having to do with state change over time.
+// Only getElement() needs to be overridden, for the simple case of a static widget.
 
 // Animation of monospaced text, rotating through a sequence of sprites.
 // The argument is an array of arrays of lines of text (strings).
@@ -149,7 +152,7 @@ function Horizontal(widgets) {
     };
 
     that.isDone = function() {
-        return widgets.reduce(function(b1, b2) { return b1 && b2; }, true);
+        return widgets.reduce(function(widget, b) { return widget.isDone() && b; }, true);
     };
 
     return that;
@@ -254,4 +257,5 @@ var stickman = AsciiAnimation([
      " /|"]
 ]);
 
-var current = Repeat(stickman, 5);
+var current = Horizontal([Repeat(stickman, 5),
+                          Textbox(":-)", "blue", "50px", "10px")]);
