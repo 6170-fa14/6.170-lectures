@@ -8,12 +8,34 @@
 // This function returns an animation of a given widget,
 // advancing to a new frame every 'period' milliseconds.
 function animation(widget, period) {
+    var paused = false, suspendedTick = null;
+
     function ticker() {
         window.setTimeout(function() {
-            widget.tick();
-            if (!widget.isDone()) { ticker(); }
+            function doTick() {
+                suspendedTick = null;
+                widget.tick();
+                if (!widget.isDone()) { ticker(); }
+            }
+
+            if (paused) {
+                suspendedTick = doTick;
+            } else {
+                doTick();
+            }
         }, period);
     }
+
+    window.onkeypress = function() {
+        if (paused) {
+            paused = false;
+            widget.unpause();
+            if (suspendedTick) suspendedTick();
+        } else {
+            paused = true;
+            widget.pause();
+        }
+    };
 
     ticker();
     return widget.getElement();
@@ -23,7 +45,9 @@ function animation(widget, period) {
 var Widget = {
     reset: function() { },
     tick: function() { },
-    isDone: function() { return true; }
+    isDone: function() { return true; },
+    pause: function() { },
+    unpause: function() { }
 };
 // We use safe defaults for everything having to do with state change over time.
 // Only getElement() needs to be overridden, for the simple case of a static widget.
@@ -124,39 +148,19 @@ function Horizontal(widgets) {
         widgets.each(function(widget) { widget.tick(); });
     };
 
+    that.pause = function() {
+        widgets.each(function(widget) { widget.pause(); });
+    };
+
+    that.unpause = function() {
+        widgets.each(function(widget) { widget.unpause(); });
+    };
+
     that.isDone = function() {
         return widgets.reduce(function(widget, b) { return widget.isDone() && b; }, true);
     };
 
     return that;
-}
-
-// Wrap a widget with a certain amount of padding, with width expressed in CSS width format.
-function WithPadding(widget, width) {
-    width = width || "10px";
-    var span = document.createElement("span");
-    span.style.display = "inline-block";
-    span.style.padding = width;
-    span.appendChild(widget.getElement());
-
-    var that = Object.create(widget);
-
-    that.getElement = function() {
-        return span;
-    };
-
-    return that;
-}
-
-// Repeat a single widget scheme (represented as a function returning a widget)
-// some number of times, horizontally.
-function RepeatHorizontal(makeWidget, count) {
-    return Horizontal(Array.create(makeWidget, count));
-}
-
-// Like RepeatHorizontal(), but with padding added around each widget.
-function RepeatHorizontalWithPadding(makeWidget, count, width) {
-    return RepeatHorizontal(function () { return WithPadding(makeWidget(), width); }, count);
 }
 
 // Plays a list of widgets in sequence, starting each after the prior one finishes.
@@ -178,7 +182,21 @@ function Sequence(widgets) {
     };
 
     that.tick = function() {
-        widgets[position].tick();
+        if (position < widgets.length) {
+            widgets[position].tick();
+        }
+    };
+
+    that.pause = function() {
+        if (position < widgets.length) {
+            widgets[position].pause();
+        }
+    };
+
+    that.unpause = function() {
+        if (position < widgets.length) {
+            widgets[position].unpause();
+        }
     };
 
     that.isDone = function() {
@@ -198,7 +216,7 @@ function Sequence(widgets) {
     return that;
 }
 
-function Textbox(text, bgcolor) {
+function Textbox(text, bgcolor, whenPaused) {
     var span = document.createElement('span');
     span.style.display = "table-cell";
     span.style.borderWidth = "2px";
@@ -209,6 +227,18 @@ function Textbox(text, bgcolor) {
 
     that.getElement = function() {
         return span;
+    };
+
+    that.pause = function() {
+        if (whenPaused) {
+            span.innerHTML = whenPaused;
+        }
+    };
+
+    that.unpause = function() {
+        if (whenPaused) {
+            span.innerHTML = text;
+        }
     };
 
     return that;
@@ -323,23 +353,23 @@ var stickman = AsciiAnimation([
 ]);
 
 function Box() {
-    return Textbox(":-)", "blue");
+    return Textbox(":-)", "blue", ":-|");
 }
 
 function Angrybox() {
-    return Textbox(">:[", "red");
+    return Textbox(">:[", "red", ":-|");
 }
 
 function Shoutingbox() {
-    return Textbox("O:<", "red");
+    return Textbox("O:<", "red", "|-:");
 }
 
 function Surprisedbox() {
-    return Textbox(":-O", "purple");
+    return Textbox(":-O", "purple", ":-|");
 }
 
 function Jokerbox() {
-    return Textbox("((((-:", "orange");
+    return Textbox("((((-:", "orange", "|-:");
 }
 
 function HoppingBox() {
@@ -386,7 +416,7 @@ function HappyMeetsAngry() {
         Horizontal([
             Surprisedbox().AtPosition(20, 50),
             Jokerbox().AtPosition(70, 50),
-            Textbox("WHY, HELLO THERE!", "white").Repeat(40)
+            Textbox("WHY, HELLO THERE!", "white").Repeat(60)
         ]),
         Textbox("And they all lived happily ever after.", "grey")
     ]);
