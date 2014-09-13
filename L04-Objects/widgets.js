@@ -69,12 +69,13 @@ function AsciiAnimation(sprites) {
 }
 
 // Play an animation over and over again, given a function for creating new widgets.
-function RepeatIndefinitely(widget) {
-    var that = Object.create(widget);
+Widget.RepeatIndefinitely = function() {
+    var parent = this;
+    var that = Object.create(this);
 
     that.isDone = function() {
-        if (widget.isDone()) {
-            widget.reset();
+        if (parent.isDone()) {
+            parent.reset();
         }
 
         return false;
@@ -84,52 +85,24 @@ function RepeatIndefinitely(widget) {
 }
 
 // Play an animation a certain number of times.
-function Repeat(widget, times) {
-    var that = Object.create(widget);
+Widget.Repeat = function(times) {
+    var parent = this;
+    var that = Object.create(this);
 
     that.isDone = function() {
         if (times <= 0) {
             return true;
         }
 
-        if (widget.isDone()) {
+        if (parent.isDone()) {
             times -= 1;
-            widget.reset();
+            parent.reset();
         }
 
         return false;
     };
 
     return that;
-}
-
-// Graphics via the HTML canvas.
-function Canvas(width, height, withContext) {
-    var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    var context = canvas.getContext('2d');
-    withContext(context);
-
-    var that = Object.create(Widget);
-
-    that.getElement = function() {
-        return canvas;
-    };
-
-    return that;
-}
-
-function Circle(radius) {
-    return Canvas(radius*2+10, radius*2+10, function(context) {
-        context.beginPath();
-        context.arc(radius+5, radius+5, radius, 0, 2 * Math.PI, false);
-        context.fillStyle = 'green';
-        context.fill();
-        context.lineWidth = 5;
-        context.strokeStyle = '#003300';
-        context.stroke();
-    });
 }
 
 // Lay out a widget array horizontally.
@@ -210,7 +183,13 @@ function Sequence(widgets) {
 
     that.isDone = function() {
         while (position < widgets.length && widgets[position].isDone()) {
+            if (position < widgets.length-1) {
+                span.removeChild(widgets[position].getElement());
+            }
             position += 1;
+            if (position < widgets.length) {
+                span.appendChild(widgets[position].getElement());
+            }
         }
 
         return position >= widgets.length;
@@ -219,15 +198,11 @@ function Sequence(widgets) {
     return that;
 }
 
-function Textbox(text, bgcolor, width, height) {
+function Textbox(text, bgcolor) {
     var span = document.createElement('span');
     span.style.display = "table-cell";
-    span.style.width = width;
-    span.style.height = height;
     span.style.borderWidth = "2px";
     span.style.backgroundColor = bgcolor;
-    span.style.textAlign = "center";
-    span.style.verticalAlign = "middle";
     span.innerHTML = text;
 
     var that = Object.create(Widget);
@@ -239,19 +214,38 @@ function Textbox(text, bgcolor, width, height) {
     return that;
 }
 
-Widget.ChangingPosition = function(maxTime, atTime) {
+Widget.AtPosition = function(left, top) {
+    var span = document.createElement("span");
+    span.style.display = "table-cell";
+    span.style.position = "absolute";
+    span.style.left = left + "px";
+    span.style.top = top + "px";
+    span.appendChild(this.getElement());
+
+    var that = Object.create(this);
+
+    that.getElement = function() {
+        return span;
+    };
+
+    return that;
+}
+
+Widget.ChangingPosition = function(move) {
     var parent = this;
     var that = Object.create(this);
 
     var span = document.createElement("span");
     span.style.position = "absolute";
     span.appendChild(this.getElement());
-    var time = 0;
+    var pos;
 
     var moveIt = function() {
-        var pos = atTime(time);
-        span.style.left = pos.left + "px";
-        span.style.top = pos.top + "px";
+        pos = move();
+        if (pos) {
+            span.style.left = pos.left + "px";
+            span.style.top = pos.top + "px";
+        }
     };
 
     moveIt();
@@ -262,7 +256,6 @@ Widget.ChangingPosition = function(maxTime, atTime) {
 
     that.tick = function() {
         if (!this.isDone()) {
-            time += 1;
             moveIt();
 
             parent.tick();
@@ -270,10 +263,45 @@ Widget.ChangingPosition = function(maxTime, atTime) {
     };
 
     that.isDone = function() {
-        return time >= maxTime;
+        return !pos;
     };
 
     return that;
+}
+
+Widget.Hopping = function(rightwardSpeed, upwardSpeed, decceleration) {
+    var displacementX = 0, displacementY = 0, done = false;
+
+    return this.ChangingPosition(function() {
+        if (done) {
+            return null;
+        }
+
+        displacementX += rightwardSpeed;
+        displacementY += upwardSpeed;
+
+        if (displacementY < 0) {
+            done = true;
+            displacementY = 0;
+        }
+
+        upwardSpeed -= decceleration;
+
+        return {left: displacementX, top: -displacementY};
+    });
+}
+
+Widget.Shaking = function(magnitude, duration) {
+    return this.ChangingPosition(function() {
+        if (duration <= 0) {
+            return null;
+        }
+
+        duration -= 1;
+        magnitude = -magnitude;
+
+        return {left: magnitude, top: 0};
+    });
 }
 
 
@@ -294,10 +322,74 @@ var stickman = AsciiAnimation([
      " /|"]
 ]);
 
-var current = Horizontal([Repeat(stickman, 5),
-                          Textbox(":-)", "blue", "50px", "10px")
-                          .ChangingPosition(10, function(time) {
-                              return {left: time*5,
-                                      top: time*10};
-                          })
-                         ]);
+function Box() {
+    return Textbox(":-)", "blue");
+}
+
+function Angrybox() {
+    return Textbox(">:[", "red");
+}
+
+function Shoutingbox() {
+    return Textbox("O:<", "red");
+}
+
+function Surprisedbox() {
+    return Textbox(":-O", "purple");
+}
+
+function Jokerbox() {
+    return Textbox("((((-:", "orange");
+}
+
+function HoppingBox() {
+    return Box().Hopping(1, 5, 1);
+}
+
+function ShakingBox() {
+    return Shoutingbox().Shaking(2, 10);
+}
+
+function RetreatingBox() {
+    return Sequence([
+        Surprisedbox().Shaking(2, 10),
+        Surprisedbox().Hopping(-1, 10, 2),
+        Surprisedbox().Hopping(-1, 10, 2).AtPosition(-15, 0)
+    ]);
+}
+
+function HoppingBoxTwice() {
+    return Sequence([
+        HoppingBox().AtPosition(5, 50),
+        HoppingBox().AtPosition(20, 50),
+        Horizontal([Box().AtPosition(35, 50),
+                    Textbox("Hi!", "white")]).Repeat(10),
+        HoppingBox().AtPosition(35, 50),
+    ]);
+}
+
+function HappyMeetsAngry() {
+    return Sequence([
+        Textbox("Once upon a time in the ASCII Kingdom....", "grey").Repeat(30),
+        Horizontal([
+            HoppingBoxTwice(),
+            Angrybox().AtPosition(70, 50)
+        ]),
+        Horizontal([
+            Box().AtPosition(50, 50),
+            ShakingBox().AtPosition(70, 50)
+        ]),
+        Horizontal([
+            RetreatingBox().AtPosition(50, 50),
+            Shoutingbox().AtPosition(70, 50)
+        ]),
+        Horizontal([
+            Surprisedbox().AtPosition(20, 50),
+            Jokerbox().AtPosition(70, 50),
+            Textbox("WHY, HELLO THERE!", "white").Repeat(40)
+        ]),
+        Textbox("And they all lived happily ever after.", "grey")
+    ]);
+}
+
+var current = HappyMeetsAngry();
