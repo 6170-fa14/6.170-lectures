@@ -239,6 +239,43 @@ function Textbox(text, bgcolor, width, height) {
     return that;
 }
 
+Widget.ChangingPosition = function(maxTime, atTime) {
+    var parent = this;
+    var that = Object.create(this);
+
+    var span = document.createElement("span");
+    span.style.position = "absolute";
+    span.appendChild(this.getElement());
+    var time = 0;
+
+    var moveIt = function() {
+        var pos = atTime(time);
+        span.style.left = pos.left + "px";
+        span.style.top = pos.top + "px";
+    };
+
+    moveIt();
+
+    that.getElement = function() {
+        return span;
+    };
+
+    that.tick = function() {
+        if (!this.isDone()) {
+            time += 1;
+            moveIt();
+
+            parent.tick();
+        }
+    };
+
+    that.isDone = function() {
+        return time >= maxTime;
+    };
+
+    return that;
+}
+
 
 //// Some example animations
 
@@ -258,4 +295,9 @@ var stickman = AsciiAnimation([
 ]);
 
 var current = Horizontal([Repeat(stickman, 5),
-                          Textbox(":-)", "blue", "50px", "10px")]);
+                          Textbox(":-)", "blue", "50px", "10px")
+                          .ChangingPosition(10, function(time) {
+                              return {left: time*5,
+                                      top: time*10};
+                          })
+                         ]);
