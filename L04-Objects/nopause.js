@@ -251,9 +251,9 @@ Widget.ChangingPosition = function(move) {
 }
 
 // A hopping behavior, with an initial velocity vector,
-// and decceleration to apply in the y direction.
+// and deceleration to apply in the y direction.
 // The animation ends when the widget returns to its original vertical position.
-Widget.Hopping = function(rightwardSpeed, upwardSpeed, decceleration) {
+Widget.Hopping = function(rightwardSpeed, upwardSpeed, deceleration) {
     var displacementX = 0, displacementY = 0, done = false;
 
     return this.ChangingPosition(function() {
@@ -269,7 +269,7 @@ Widget.Hopping = function(rightwardSpeed, upwardSpeed, decceleration) {
             displacementY = 0;
         }
 
-        upwardSpeed -= decceleration;
+        upwardSpeed -= deceleration;
 
         return {left: displacementX, top: -displacementY};
     });
