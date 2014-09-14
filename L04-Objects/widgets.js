@@ -1,47 +1,20 @@
 // Some animation widgets, squeezed together in one source file for simplicity of reading
 
-// "Interface" of a widget object:
-// getElement(), to return a DOM node standing for this object
-// tick(), called to advance the animation to the next step
-// isDone(), querying whether this part of the animation is done
+// In general, a widget is an object with certain methods.
+// This list of methods functions like an interface in Java,
+// but of course JavaScript doesn't enforce it statically.
+//
+// REQUIRED METHODS:
+// getElement(): return a DOM node standing for this object.
+// reset(): begin the animation again from the start.
+// tick(): advance the animation to the next step.
+// isDone(): query whether this part of the animation is done (returns Boolean).
+// pause(): stop the animation until further notice.
+// unpause(): resume the animation after a pause.
 
-// This function returns an animation of a given widget,
-// advancing to a new frame every 'period' milliseconds.
-function animation(widget, period) {
-    var paused = false, suspendedTick = null;
-
-    function ticker() {
-        window.setTimeout(function() {
-            function doTick() {
-                suspendedTick = null;
-                widget.tick();
-                if (!widget.isDone()) { ticker(); }
-            }
-
-            if (paused) {
-                suspendedTick = doTick;
-            } else {
-                doTick();
-            }
-        }, period);
-    }
-
-    window.onkeypress = function() {
-        if (paused) {
-            paused = false;
-            widget.unpause();
-            if (suspendedTick) suspendedTick();
-        } else {
-            paused = true;
-            widget.pause();
-        }
-    };
-
-    ticker();
-    return widget.getElement();
-}
 
 // Behold: the prototypical widget!
+// Every widget "inherits from" this one, via its prototype chain.
 var Widget = {
     reset: function() { },
     tick: function() { },
@@ -59,16 +32,20 @@ function AsciiAnimation(sprites) {
 
     var span = document.createElement('span');
     span.style.display = "inline-block";
+    // This part is important to let us treat an animation as a single "word"
+    // for purposes of horizontal layout on the page.
     var pre = document.createElement('pre');
+    // <pre> is for preformatted, monospaced text.
     span.appendChild(pre);
 
-    var useSprite = function(i) {
+    var animationFrame = 0;
+
+    var useSprite = function() {
         pre.innerHTML = "";
-        sprites[i].each(function(line) { pre.innerHTML += line + "\n"; });
+        sprites[animationFrame].each(function(line) { pre.innerHTML += line + "\n"; });
     };
 
-    var animationFrame = 0;
-    useSprite(0);
+    useSprite();
 
     that.getElement = function() {
         return span;
@@ -76,12 +53,13 @@ function AsciiAnimation(sprites) {
 
     that.reset = function() {
         animationFrame = 0;
+        useSprite();
     };
 
     that.tick = function() {
         animationFrame += 1;
         if (animationFrame < sprites.length) {
-            useSprite(animationFrame);
+            useSprite();
         }
     };
 
@@ -92,7 +70,7 @@ function AsciiAnimation(sprites) {
     return that;
 }
 
-// Play an animation over and over again, given a function for creating new widgets.
+// Modify an animation to play over and over again.
 Widget.RepeatIndefinitely = function() {
     var parent = this;
     var that = Object.create(this);
@@ -108,7 +86,7 @@ Widget.RepeatIndefinitely = function() {
     return that;
 }
 
-// Play an animation a certain number of times.
+// Modify an animation to repeat a given number of times.
 Widget.Repeat = function(times) {
     var parent = this;
     var that = Object.create(this);
@@ -129,9 +107,9 @@ Widget.Repeat = function(times) {
     return that;
 }
 
-// Lay out a widget array horizontally.
+// Lay out a widget array horizontally, with all the widgets animating simultaneously.
 function Horizontal(widgets) {
-    var span = document.createElement('span');
+    var span = document.createElement("span");
     widgets.each(function(widget) { span.appendChild(widget.getElement()); });
 
     var that = Object.create(Widget);
@@ -158,12 +136,13 @@ function Horizontal(widgets) {
 
     that.isDone = function() {
         return widgets.reduce(function(widget, b) { return widget.isDone() && b; }, true);
+        // Done iff all constituents are done
     };
 
     return that;
 }
 
-// Plays a list of widgets in sequence, starting each after the prior one finishes.
+// Plays an array of widgets in sequence, starting each after the prior one finishes.
 function Sequence(widgets) {
     var span = document.createElement("span");
     span.appendChild(widgets[0].getElement());
@@ -216,6 +195,9 @@ function Sequence(widgets) {
     return that;
 }
 
+// Another basic graphical element:
+// some text with a rectangular background of a certain color.
+// The 'whenPaused' text, if passed, is what appears instead while paused.
 function Textbox(text, bgcolor, whenPaused) {
     var span = document.createElement('span');
     span.style.display = "table-cell";
@@ -244,6 +226,7 @@ function Textbox(text, bgcolor, whenPaused) {
     return that;
 }
 
+// Widget modifier to change the position on screen
 Widget.AtPosition = function(left, top) {
     var span = document.createElement("span");
     span.style.display = "table-cell";
@@ -261,6 +244,10 @@ Widget.AtPosition = function(left, top) {
     return that;
 }
 
+// Like 'AtPosition', but the x/y coordinates can change each tick,
+// based on what 'move' returns next.  It should return either:
+// - an object with 'left' and 'right' integer fields, denoting a position, or
+// - 'null', to indicate that the animation is done.
 Widget.ChangingPosition = function(move) {
     var parent = this;
     var that = Object.create(this);
@@ -299,6 +286,9 @@ Widget.ChangingPosition = function(move) {
     return that;
 }
 
+// A hopping behavior, with an initial velocity vector,
+// and decceleration to apply in the y direction.
+// The animation ends when the widget returns to its original vertical position.
 Widget.Hopping = function(rightwardSpeed, upwardSpeed, decceleration) {
     var displacementX = 0, displacementY = 0, done = false;
 
@@ -321,6 +311,7 @@ Widget.Hopping = function(rightwardSpeed, upwardSpeed, decceleration) {
     });
 }
 
+// A shaking behavior, switching rapidly between two different horizontal offsets.
 Widget.Shaking = function(magnitude, duration) {
     return this.ChangingPosition(function() {
         if (duration <= 0) {
@@ -337,57 +328,83 @@ Widget.Shaking = function(magnitude, duration) {
 
 //// Some example animations
 
-var stickman = AsciiAnimation([
-    [" o ",
-     "-|-",
-     "/ \\"],
-    ["o  ",
-     "|- ",
-     "|\\ "],
-    [" o ",
-     "-|-",
-     "/ \\"],
-    ["  o",
-     " -|",
-     " /|"]
-]);
+// ASCII stick man
+function Stickman() {
+    return AsciiAnimation([
+        [" o ",
+         "-|-",
+         "/ \\"],
+        ["o  ",
+         "|- ",
+         "|\\ "],
+        [" o ",
+         "-|-",
+         "/ \\"],
+        ["  o",
+         " -|",
+         " /|"]
+    ]);
+}
 
+// Three of them, repeating forever!
+function Stickmen() {
+    return Horizontal([
+        Stickman().RepeatIndefinitely(),
+        Stickman().RepeatIndefinitely(),
+        Stickman().RepeatIndefinitely()
+    ]);
+}
+
+// Now one of the stickmen gets tired after 2 iterations.
+function StickmenTired() {
+    return Horizontal([
+        Stickman().RepeatIndefinitely(),
+        Stickman().RepeatIndefinitely(),
+        Stickman().Repeat(2)
+    ]);
+}
+
+// Set up 'n' stickmen in a row.
+function CloneStickmen(n) {
+    return Horizontal(Array.create(Stickman, n));
+}
+
+// Now some of the stickmen get so tired that they decide to leave.
+function StickmenTired() {
+    return Sequence([
+        CloneStickmen(3).Repeat(3),
+        CloneStickmen(2).Repeat(3),
+        CloneStickmen(1).Repeat(3),
+        CloneStickmen(10)
+    ]);
+}
+
+
+//// "Once upon a time in the ASCII Kingdom" animation....
+
+// A few different textboxes, corresponding to expressions of our two actors
 function Box() {
     return Textbox(":-)", "blue", ":-|");
 }
-
 function Angrybox() {
     return Textbox(">:[", "red", ":-|");
 }
-
 function Shoutingbox() {
     return Textbox("O:<", "red", "|-:");
 }
-
 function Surprisedbox() {
     return Textbox(":-O", "purple", ":-|");
 }
-
 function Jokerbox() {
     return Textbox("((((-:", "orange", "|-:");
 }
 
+// A happy box hopping once to the right
 function HoppingBox() {
     return Box().Hopping(1, 5, 1);
 }
 
-function ShakingBox() {
-    return Shoutingbox().Shaking(2, 10);
-}
-
-function RetreatingBox() {
-    return Sequence([
-        Surprisedbox().Shaking(2, 10),
-        Surprisedbox().Hopping(-1, 10, 2),
-        Surprisedbox().Hopping(-1, 10, 2).AtPosition(-15, 0)
-    ]);
-}
-
+// The leftward actor hopping toward the rightward actor, saying "Hi!"
 function HoppingBoxTwice() {
     return Sequence([
         HoppingBox().AtPosition(5, 50),
@@ -398,6 +415,21 @@ function HoppingBoxTwice() {
     ]);
 }
 
+// A shouting box shaking angrily
+function ShakingBox() {
+    return Shoutingbox().Shaking(2, 10);
+}
+
+// A surprised box shaking and then hopping backwards twice
+function RetreatingBox() {
+    return Sequence([
+        Surprisedbox().Shaking(2, 10),
+        Surprisedbox().Hopping(-1, 10, 2),
+        Surprisedbox().Hopping(-1, 10, 2).AtPosition(-15, 0)
+    ]);
+}
+
+// The whole animation.  Play it to see what it does. :-)
 function HappyMeetsAngry() {
     return Sequence([
         Textbox("Once upon a time in the ASCII Kingdom....", "grey").Repeat(30),
@@ -422,4 +454,5 @@ function HappyMeetsAngry() {
     ]);
 }
 
-var current = HappyMeetsAngry();
+// The support files look in this variable to see which widget to animate and how quickly.
+var current = {period: 50, widget: HappyMeetsAngry()};
