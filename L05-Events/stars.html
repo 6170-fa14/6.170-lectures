@@ -2,11 +2,12 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="l05.js"></script>
+    <script type="text/javascript" src="star_widget.js"></script>
     <link rel="stylesheet" type="text/css" href="stars.css">
   </head>
-  <body>
-    <div class="star star-basic"></div>
-    <div class="star star-on"></div>
-    <div class="star star-hover"></div>
+  <body onload="$('#stargoeshere').append(starWidget(3, function(i) { console.log('Select ' + i); }));">
+    <div id="stargoeshere"></div>
   </body>
 </html>
