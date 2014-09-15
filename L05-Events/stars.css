@@ -1,0 +1,23 @@
+/*
+ * DNJ: star widget style sheet
+ * Developed by Daniel Jackson for 6.170.
+ */
+.star {
+  overflow: hidden; /* crucial: this is what makes it work! */
+  cursor: pointer;
+  float: left;
+}
+.star {
+  width: 16px;
+  height: 15px;
+  background: url(stars.gif) no-repeat 0 0;
+}
+.star-basic {
+  background-position: 0 -32px;
+}
+.star-on {
+  background-position: 0 -48px;
+}
+.star-hover {
+  background-position: 0 -64px;
+}
