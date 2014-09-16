@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="l05.js"></script>
+    <script type="text/javascript" src="reactive.js"></script>
+    <script type="text/javascript" src="reactive_star_widget.js"></script>
+    <link rel="stylesheet" type="text/css" href="stars.css">
+  </head>
+  <body onload="var stars = starWidget();
+                $('#stargoeshere').append(stars.node)
+                .append(reactiveText(stars.signal));">
+    <div id="stargoeshere"></div>
+  </body>
+</html>

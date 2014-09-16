@@ -7,7 +7,7 @@ function starWidget(initialValue, onChange) {
 
     // Next, an array of DOM nodes for the 5 stars.
     var stars = Array.create(function(i) {
-        return $("<span></span>")
+        return $("<span>")
 
             // Add basic star styling (see next recitation for more detail on CSS classes!)
             .addClass("star star-basic")
@@ -55,5 +55,5 @@ function starWidget(initialValue, onChange) {
     };
 
     // Finally, return a <div> containing the stars.
-    return $("<div></div>").append(stars);
+    return $("<div>").append(stars);
 }

@@ -63,12 +63,26 @@ function read(signal, f) {
     };
 }
 
+// Create a text node that always display's a signal's latest value.
 function reactiveText(signal) {
     var node = $("<span></span>");
     signal(function(value) { $(node).text(value); });
     return node;
 }
 
+// Here we use jQuery's convenient hook for adding another chainable method for selectors.
+// Presumably this works via prototypes under the hood!
+jQuery.fn.extend({
+    // This is the name of the method we add, to connect a signal to the CSS class list of a node.
+    reactiveCss: function(signal) {
+        this.each(function() {
+            var that = this;
+            signal(function(value) { $(that).removeClass().addClass(value); });
+        });
+
+        return this;
+    }
+});
 
 /// A few test cases (different signals to use with reactiveText())
 
