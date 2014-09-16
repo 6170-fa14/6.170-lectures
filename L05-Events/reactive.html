@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="l05.js"></script>
+    <script type="text/javascript" src="reactive.js"></script>
+    <link rel="stylesheet" type="text/css" href="stars.css">
+  </head>
+  <body onload="$('#it').append(reactiveText(counterIs))
+                .append($('<br>'))
+                .append(reactiveText(counter2Is))
+                .append($('<br>'))
+                .append(reactiveText(sumIs));">
+    <div id="it"></div>
+    <button onclick="counter.set(counter.get() + 1);">Increment</button>
+    <button onclick="counter2.set(counter2.get() + 1);">Increment2</button>
+  </body>
+</html>
