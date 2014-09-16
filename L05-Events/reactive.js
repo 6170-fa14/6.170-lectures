@@ -65,9 +65,17 @@ function read(signal, f) {
 
 // Create a text node that always display's a signal's latest value.
 function reactiveText(signal) {
-    var node = $("<span></span>");
+    var node = $("<div>");
     signal(function(value) { $(node).text(value); });
     return node;
+}
+
+// Textbox that exports its contents as a signal.
+function reactiveTextbox() {
+    var s = Source("");
+
+    return {node: $("<input>").keyup(function() { s.set($(this).val()); }),
+            signal: source(s)};
 }
 
 // Here we use jQuery's convenient hook for adding another chainable method for selectors.
