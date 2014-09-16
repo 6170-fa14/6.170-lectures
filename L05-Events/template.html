@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <script>
+      function fib(n) {
+        if (n === 0) {
+          return 0;
+        } else if (n === 1) {
+          return 1;
+        } else {
+          return fib(n-1) + fib(n-2);
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <button onclick="console.log('CLICK')"
+            onmouseover="console.log('MOUSEOVER')"
+            onmouseout="console.log('MOUSEOUT')">Button</button>
+  </body>
+</html>
