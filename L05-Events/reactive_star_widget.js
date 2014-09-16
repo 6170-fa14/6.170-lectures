@@ -1,9 +1,8 @@
 // Create a new star widget DOM node.  Arguments:
-// initialValue: optional number 0-4, indicating currently selected star
 // onChange: function called with new selection number, whenever it changes
-function starWidget(initialValue) {
+function starWidget(onChange) {
     // Which star level is selected, if any?
-    var selected = Source(initialValue);
+    var selected = Source();
 
     // Which star might we be hovering over?
     var hovering = Source(null);
@@ -50,5 +49,31 @@ function starWidget(initialValue) {
 
     // Finally, return a <div> containing the stars.
     return {node: $("<div>").append(stars),
-            signal: source(selected)};
+            signal: read(source(selected), function(n) { return result(n >= 0 ? n+1 : 0); })};
+}
+
+
+// A derived widget: a sequence of stars widgets, with label text on each.
+// Returns a node and a signal of the _highest_ selection.
+function starsWidget(labels) {
+    var stars = labels.map(function(label) {
+        var star = starWidget();
+        // Notice how pleasant it is to use the existing widget here as a simple building block. :)
+
+        return {node: $("<div>")
+                .append(star.node)
+                .append($("<span>").text(label)),
+                signal: star.signal};
+    });
+
+    return {node: $("<div>").append(stars.map(function(star) {
+        return star.node;
+    })),
+            signal: stars.reduce(function(star, sig) {
+                return read(star.signal, function(cur) {
+                    return read(sig, function(prev) {
+                        return result(Math.max(prev, cur));
+                    });
+                });
+            }, result(0))}
 }

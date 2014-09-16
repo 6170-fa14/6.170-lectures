@@ -25,3 +25,10 @@ Array.prototype.eachi = function(f) {
         f(i, this[i]);
     }
 };
+
+// Step through an array in order, using a function to combine elements,
+// beginning with an initial accumulator.
+Array.prototype.reduce = function(f, acc) {
+    this.each(function(x) { acc = f(x, acc); });
+    return acc;
+};

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="l05.js"></script>
+    <script type="text/javascript" src="reactive.js"></script>
+    <script type="text/javascript" src="reactive_star_widget.js"></script>
+    <link rel="stylesheet" type="text/css" href="stars.css">
+  </head>
+  <body onload="var many = starsWidget(['Couscous Kitchen', 'Clover', 'Jerusalem Cafe (former)', 'Jose\'s Mexican', 'Momogoose']);
+                $('#here').append(many.node)
+                .append(reactiveText(sum(result('Highest rating: '), many.signal)));">
+    <div id="here"></div>
+  </body>
+</html>
