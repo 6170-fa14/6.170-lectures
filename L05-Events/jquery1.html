@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+
+    <script>
+      // Set up some code to run only once the document is done loading.
+      $(document).ready(function() {
+        $("#mybutton")
+        .click(function() { console.log('CLICK'); })
+        .mouseover(function() { console.log('MOUSEOVER'); })
+        .mouseout(function() { console.log('MOUSEOUT'); });
+      });
+    </script>
+  </head>
+  <body>
+    <button id="mybutton">Button</button>
+  </body>
+</html>

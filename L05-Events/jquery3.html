@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+
+    <script>
+      // Set up some code to run only once the document is done loading.
+      $(document).ready(function() {
+        // Find the 'extendme' <div>s and add a new button to each child.
+        $(".extendme").append($("<button>")
+          .text("Button")
+          .click(function() { console.log('CLICK'); })
+          .mouseover(function() { console.log('MOUSEOVER'); })
+          .mouseout(function() { console.log('MOUSEOUT'); }));
+      });
+    </script>
+  </head>
+  <body onclick="console.log('DOC CLICK')">
+    <div class="extendme">
+      Some text is here already.
+    </div>
+
+    <div class="extendme">
+      Something completely different is here.
+    </div>
+  </body>
+</html>

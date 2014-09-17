@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="jquery.min.js"></script>
+
+    <script>
+      // Set up some code to run only once the document is done loading.
+      $(document).ready(function() {
+        // Find the 'goeshere' <div> and add a new button as its child.
+        $("#goeshere").append($("<button>")
+          .text("Button")
+          .click(function() { console.log('CLICK'); })
+          .mouseover(function() { console.log('MOUSEOVER'); })
+          .mouseout(function() { console.log('MOUSEOUT'); }));
+      });
+    </script>
+  </head>
+  <body>
+    <div id="goeshere">
+      Some text is here already.
+    </div>
+  </body>
+</html>
