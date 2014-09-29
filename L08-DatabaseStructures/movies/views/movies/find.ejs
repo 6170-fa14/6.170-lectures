@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <%- include ../head.ejs %>
+  <body>
+	  <%- include ../links.ejs %>
+    <h2>Enter one or more criteria to find matching movies:</h2>
+    <form id="find-movie" action="/movies/search" method="post">
+  		<p>Movie title: <input name="title" type="text" /></p>
+  		<p>Start time: <input name="time" type="text" /></p>
+  		<p>Theater name: <input name="theater" type="text" /></p>
+      <p><input type="submit" /></p>
+    </form>
+  </body>
+</html>

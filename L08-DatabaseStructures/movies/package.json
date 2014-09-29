@@ -1,0 +1,16 @@
+{
+  "name": "movies",
+  "description": "toy movie app to demonstrate mongo",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "4.9.4",
+    "ejs": "~0.8.5",
+    "mongodb": "*",
+    "mongoose": "*",
+    "body-parser": "~1.0.0"
+  }
+}

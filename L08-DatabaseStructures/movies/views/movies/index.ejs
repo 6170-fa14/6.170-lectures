@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <%- include ../head.ejs %>
+  <body id="movies">
+	  <%- include ../links.ejs %>
+    <h2>Movies showing</h2>
+    <table>
+    <% movies.forEach(function(movie, index) { %>
+        <tr>
+          <td><%= movie.title %></td>
+          <td><%= movie.theater %></td>
+          <td><%= movie.time %></td>
+      </tr>
+    <% }); %>
+    </table>
+  </body>
+</html>
