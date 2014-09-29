@@ -66,6 +66,7 @@ var setupRoutes = function (db) {
     if (req.body.title.length > 0)
       query.push({title: req.body.title});
     if (req.body.time.length > 0)
+      // note: no error handling here; will throw exception if time field misformed
       query.push({time: Time.parse(req.body.time)});
     if (req.body.theater.length > 0)	
       theaters.findOne({name: req.body.theater}, function (err, theater) {

@@ -44,9 +44,13 @@ var setupRoutes = function (db) {
   	var movies = db.collection('movies');
 		// construct an array with a subquery for each search field
     var query = [];
-    if (req.body.title.length > 0) query.push({title: req.body.title});
-    if (req.body.time.length > 0) query.push({time: Time.parse(req.body.time)});
-    if (req.body.theater.length > 0) query.push({'theater.name': req.body.theater});
+    if (req.body.title.length > 0)
+      query.push({title: req.body.title});
+    if (req.body.time.length > 0)
+      // note: no error handling here; will throw exception if time ill-formed
+      query.push({time: Time.parse(req.body.time)});
+    if (req.body.theater.length > 0)
+      query.push({'theater.name': req.body.theater});
 		// if button is pressed and all fields are empty, just redisplay form
 		// else query database using conjunction of subqueries and render results
     if (query.length == 0)
