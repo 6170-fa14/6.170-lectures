@@ -1,6 +1,5 @@
 // Create a new star widget DOM node.  Arguments:
-// onChange: function called with new selection number, whenever it changes
-function starWidget(onChange) {
+function starWidget() {
     // Which star level is selected, if any?
     var selected = Source();
 
@@ -29,7 +28,7 @@ function starWidget(onChange) {
 
             // Finally, compute the right CSS classes reactively.
             .reactiveCss(read(source(hovering), function(hov) {
-                if (hov) {
+                if (hov !== null) {
                     if (i <= hov) {
                         return result("star star-hover");
                     } else {
