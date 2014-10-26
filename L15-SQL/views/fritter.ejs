@@ -17,7 +17,7 @@
       </form>
     <% } %>
 
-    <h2>Recent Messages</h2>
+    <h2>Messages</h2>
     <% messages.forEach(function(message) { %>
       <b><%= message.user %>:</b> <%= message.text %><br/>
     <% }); %>
@@ -29,6 +29,21 @@
         <input type="text" name="text">
         <input type="submit" value="Send">
       </form>
+
+      <h2>Following</h2>
+
+      <form action="/follow" method="post">
+        Start following: <input type="text" name="user"> <input type="submit" value="Follow">
+      </form>
+
+      <h3>Following now</h3>
+      <% following.forEach(function(followed) { %>
+        <form action="/unfollow" method="post">
+          <b><%= followed.followed %></b>
+          <input type="hidden" name="user" value="<%= followed.followed %>">
+          <input type="submit" value="Unfollow">
+        </form>
+      <% }); %>
     <% } %>
   </body>
 </html>
