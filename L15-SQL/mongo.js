@@ -21,16 +21,16 @@ app.get('/', function (req, res) {
 
     if (user) {
         db.get('followers').find({follower: user}, function(e, following) {
-            db.get('messages').find({user: {$in: following.map(function(x) { return x.followed; })}},
+            db.get('messages').find({usr: {$in: following.map(function(x) { return x.followed; })}},
                                     function(e, messages) {
-                                        res.render('fritter', {user: user,
+                                        res.render('fritter', {usr: user,
                                                                messages: messages,
                                                                following: following});
                                     });
         });
     } else {
         db.get('messages').find({}, function(e, messages) {
-            res.render('fritter', {user: user, messages: messages});
+            res.render('fritter', {usr: user, messages: messages});
         });
     }
 });
@@ -49,7 +49,7 @@ app.post('/send', function (req, res) {
     var user = req.cookies.user;
 
     if (user) {
-        db.get('messages').insert({user: user, text: req.body.text},
+        db.get('messages').insert({usr: user, text: req.body.text},
                                   function() { res.redirect('/'); });
     }
 });

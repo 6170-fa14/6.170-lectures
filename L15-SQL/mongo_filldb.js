@@ -30,7 +30,7 @@ function messagesForUser(user, count, callback) {
         callback();
     } else {
         var message = Math.random() + "!";
-        db.get('messages').insert({user: "user" + user, text: message},
+        db.get('messages').insert({usr: "user" + user, text: message},
                                   function() { messagesForUser(user, count+1, callback); });
     }
 }
