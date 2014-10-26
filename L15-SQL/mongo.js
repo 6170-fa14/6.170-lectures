@@ -23,7 +23,7 @@ app.get('/', function (req, res) {
         db.get('followers').find({follower: user}, function(e, following) {
             db.get('messages').find({usr: {$in: following.map(function(x) { return x.followed; })}},
                                     function(e, messages) {
-                                        res.render('fritter', {usr: user,
+                                        res.render('fritter', {user: user,
                                                                messages: messages,
                                                                following: following});
                                     });
