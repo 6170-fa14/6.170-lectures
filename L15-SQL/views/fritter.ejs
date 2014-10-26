@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fritter--</title>
+  </head>
+  <body>
+    <h2>Session Info</h2>
+    <% if (user) { %>
+      Logged in as <%= user %>.
+      <form action="/logout" method="post">
+        <input type="submit" value="Log out">
+      </form>
+    <% } else { %>
+      <form action="/login" method="post">
+        <input type="text" name="user">
+        <input type="submit" value="Log in">
+      </form>
+    <% } %>
+
+    <h2>Recent Messages</h2>
+    <% messages.forEach(function(message) { %>
+      <b><%= message.user %>:</b> <%= message.text %><br/>
+    <% }); %>
+
+    <% if (user) { %>
+      <h2>Send Message</h2>
+
+      <form action="/send" method="post">
+        <input type="text" name="text">
+        <input type="submit" value="Send">
+      </form>
+    <% } %>
+  </body>
+</html>
