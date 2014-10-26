@@ -5,6 +5,7 @@ var db = monk(connection_string);
 
 var num_users = 1000;
 var each_follows = 20;
+var each_messages = 10;
 
 function followersForUser(user, count, callback) {
     if (count >= each_follows) {
@@ -16,10 +17,30 @@ function followersForUser(user, count, callback) {
     }
 }
 
-function createFollowers(user) {
-    if (user < num_users) {
-        followersForUser(user, 0, function() { createFollowers(user+1); })
+function createFollowers(user, callback) {
+    if (user >= num_users) {
+        callback();
+    } else {
+        followersForUser(user, 0, function() { createFollowers(user+1, callback); })
     }
 }
 
-createFollowers(0);
+function messagesForUser(user, count, callback) {
+    if (count >= each_messages) {
+        callback();
+    } else {
+        var message = Math.random() + "!";
+        db.get('messages').insert({user: "user" + user, text: message},
+                                  function() { messagesForUser(user, count+1, callback); });
+    }
+}
+
+function createMessages(user, callback) {
+    if (user >= num_users) {
+        callback();
+    } else {
+        messagesForUser(user, 0, function() { createMessages(user+1, callback); })
+    }
+}
+
+createFollowers(0, function() { createMessages (0, function() { process.exit(0); }); });
