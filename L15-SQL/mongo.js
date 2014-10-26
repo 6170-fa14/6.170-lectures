@@ -13,6 +13,8 @@ var monk = require('monk');
 var connection_string = 'localhost/fritter';
 
 var db = monk(connection_string);
+db.get('followers').index('follower');
+db.get('messages').index('user');
 
 app.get('/', function (req, res) {
     var user = req.cookies.user;
