@@ -1,0 +1,3 @@
+#!/bin/sh
+
+siege -H "Cookie: user=adamc" -c 10 -r 100 http://localhost:8080/
