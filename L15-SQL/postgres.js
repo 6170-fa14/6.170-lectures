@@ -54,7 +54,7 @@ app.post('/send', function (req, res) {
 
     if (user) {
         pg.connect(connection_string, function(err, db, done) {
-            db.query('BEGIN TRANSACTION',
+            db.query('BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE',
                      function() {
                          db.query("SELECT NEXTVAL('messageIds') AS id",
                                   function(err, id) {
