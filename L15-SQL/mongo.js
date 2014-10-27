@@ -19,6 +19,11 @@ db.get('messages').index('user');
 app.get('/', function (req, res) {
     var user = req.cookies.user;
 
+    // A convenient trick for benchmarking against random user IDs
+    if (user == 'benchmark') {
+        user = 'user' + Math.floor(Math.random() * 1000);
+    }
+
     if (user) {
         db.get('followers').find({follower: user}, function(e, following) {
             db.get('messages').find({usr: {$in: following.map(function(x) { return x.followed; })}},
@@ -48,6 +53,11 @@ app.post('/logout', function (req, res) {
 app.post('/send', function (req, res) {
     var user = req.cookies.user;
 
+    // A convenient trick for benchmarking against random user IDs
+    if (user == 'benchmark') {
+        user = 'user' + Math.floor(Math.random() * 1000);
+    }
+
     if (user) {
         db.get('messages').insert({usr: user, text: req.body.text},
                                   function() { res.redirect('/'); });
@@ -72,4 +82,16 @@ app.post('/unfollow', function (req, res) {
     }
 });
 
-app.listen(8080);
+// Code for running a _cluster_ with multiple concurrent server processes.
+
+var cluster = require("cluster");
+var http = require("http");
+var numCPUs = require("os").cpus().length;
+
+if (cluster.isMaster) {
+    for (var i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+} else {
+    app.listen(8080);
+}

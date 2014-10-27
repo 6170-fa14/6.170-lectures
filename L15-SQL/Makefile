@@ -1,7 +1,7 @@
 .PHONY: benchmark initsql
 
 benchmark:
-	siege -H "Cookie: user=adamc" -c 10 -r 20 http://localhost:8080/
+	siege -H "Cookie: user=adamc" -c 10 -r 50 -f urls.siege
 
 PGAUTH := -h localhost -U fritter
 
