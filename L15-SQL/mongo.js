@@ -85,7 +85,6 @@ app.post('/unfollow', function (req, res) {
 // Code for running a _cluster_ with multiple concurrent server processes.
 
 var cluster = require("cluster");
-var http = require("http");
 var numCPUs = require("os").cpus().length;
 
 if (cluster.isMaster) {
