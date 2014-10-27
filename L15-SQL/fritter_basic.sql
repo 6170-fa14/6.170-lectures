@@ -8,5 +8,5 @@ CREATE TABLE followers(
        followed TEXT NOT NULL
 );
 
--- CREATE INDEX ON messages(usr);
--- CREATE INDEX ON followers(follower);
+CREATE INDEX ON messages(usr);
+CREATE INDEX ON followers(follower);
