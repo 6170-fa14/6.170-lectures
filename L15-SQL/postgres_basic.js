@@ -27,17 +27,17 @@ app.get('/', function (req, res) {
                      db.query('SELECT usr, text FROM messages, followers WHERE usr = followed AND follower = $1',
                               [user],
                               function(err, messages) {
-                                  res.render('fritter', {user: user,
-                                                         messages: messages.rows,
-                                                         following: following.rows});
+                                  res.render('fritter_basic', {user: user,
+                                                               messages: messages.rows,
+                                                               following: following.rows});
                                   done();
                               });
                      });
         } else {
             db.query('SELECT text FROM messages, followers',
                      function(err, messages) {
-                         res.render('fritter', {user: user,
-                                                messages: messages.rows});
+                         res.render('fritter_basic', {user: user,
+                                                      messages: messages.rows});
                          done();
                      });
         }

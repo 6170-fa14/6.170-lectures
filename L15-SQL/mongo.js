@@ -28,14 +28,14 @@ app.get('/', function (req, res) {
         db.get('followers').find({follower: user}, function(e, following) {
             db.get('messages').find({usr: {$in: following.map(function(x) { return x.followed; })}},
                                     function(e, messages) {
-                                        res.render('fritter', {user: user,
-                                                               messages: messages,
-                                                               following: following});
+                                        res.render('fritter_basic', {user: user,
+                                                                     messages: messages,
+                                                                     following: following});
                                     });
         });
     } else {
         db.get('messages').find({}, function(e, messages) {
-            res.render('fritter', {usr: user, messages: messages});
+            res.render('fritter_basic', {user: user, messages: messages});
         });
     }
 });
