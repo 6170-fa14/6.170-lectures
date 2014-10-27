@@ -14,7 +14,7 @@ var connection_string = 'localhost/fritter';
 
 var db = monk(connection_string);
 db.get('followers').index('follower');
-db.get('messages').index('user');
+db.get('messages').index('usr');
 
 app.get('/', function (req, res) {
     var user = req.cookies.user;
