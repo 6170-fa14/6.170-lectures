@@ -1,0 +1,9 @@
+database dbname=fritter
+sql fritter.sql
+rewrite all Fritter/*
+safeGet main
+safeGet logout
+
+$/list
+$/string
+fritter

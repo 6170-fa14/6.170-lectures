@@ -20,6 +20,7 @@ fun main () =
            | Some _ => <xml>
              <p><a link={logout ()}>[Logout]</a></p>
            </xml>}
+      </body>
     </xml>
 
 and login r =
