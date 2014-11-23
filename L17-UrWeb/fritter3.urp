@@ -1,0 +1,6 @@
+database dbname=fritter
+sql fritter.sql
+rewrite all Fritter3/*
+
+$/string
+fritter3
