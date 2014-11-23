@@ -1,0 +1,5 @@
+database dbname=fritter
+sql fritter.sql
+rewrite url Fritter1/*
+
+fritter1
