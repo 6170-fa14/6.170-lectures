@@ -1,5 +1,5 @@
 database dbname=fritter
 sql fritter.sql
-rewrite all Fritter1/*
+rewrite all Fritter2/*
 
-fritter1
+fritter2
