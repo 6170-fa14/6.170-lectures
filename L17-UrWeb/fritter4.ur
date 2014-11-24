@@ -22,11 +22,6 @@ table message : { User : string,
 table follow : { Followed : string,
                  Follower : string }
 
-table hashtag : { Tag : string,
-                  User : string,
-                  When : time }
-(* Here the last two fields are references to [message]. *)
-
 fun main () =
     loggedInAs <- getCookie user;
 
